@@ -1,45 +1,35 @@
 import gensim
+from gensim.models import Word2Vec
 import numpy as np
 from nltk.corpus import stopwords
 import csv
+import sys
+sys.path.insert(0, '../helpers')
+import wordPrep
 
-s1 = "what should I do be great geologist"
-s2 = "how can I be good geologist"
-s3 = "what was your first sexual experience"
+#flags:
+outputcsv = True
 
-model = gensim.models.KeyedVectors.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
 
-def removeStopWords(s):
-	filtered_words = [word for word in s if word not in stopwords.words('english')]
-	if "" in filtered_words: filtered_words.remove("")
-	return filtered_words
 
-def cleanword(w):
-	w = w.replace("?", "")
-	w = w.replace(".","")
-	w = w.replace(",","")
-	w = w.replace(";","")
-	w = w.replace(":","")
-	w = w.replace("(","")
-	w = w.replace(")","")
-	w = w.replace("\"","")
-	w = w.replace("'","")
-	return w
+#model = gensim.models.KeyedVectors.load_word2vec_format('../wordVecData/GoogleNews-vectors-negative300.bin', binary=True)
+model = Word2Vec.load('training model')
+wp = wordPrep.wordPreper()
+
+def prepareWords(s):
+	s2 = wp.removePunctuation(s)
+	s2 = wp.removeStopWords(s2)
+	return s2
 
 def vectorise(s):
 	#get vectors for each word
-	arr = removeStopWords(s.split(' '))
+	arr = prepareWords(s.split(' '))
 	vecs = []
 	
 	for w in arr:
+		vecs.append(model.wv[w])
 		#print(w)
-		w = cleanword(w)
-		try:
-		    vecs.append(model.wv[w])
-		except KeyError:
-		    #ignore the error
-		    continue
-
+		
 	#average the vectors
 	vec = vecs[0]
 	for v in vecs:
@@ -65,7 +55,7 @@ with open('../data/trainSmall.csv', 'r', encoding='utf-8') as f:
             v2 = vectorise(row[4])
         except KeyError as e:
             #print("ERROR!")
-            print(str(e))
+            #print(str(e))
             continue
         except IndexError:
             continue
@@ -73,13 +63,12 @@ with open('../data/trainSmall.csv', 'r', encoding='utf-8') as f:
         if row[5] == "1":
             sameDists.append(np.linalg.norm(v1-v2))
         else:
-            diffDists.append(np.linalg.norm(v1-v2))
+            diffDists.append(np.linalg.norm(v1-v2))#
 		
 		
         if count%100 == 0:
             print("\t\t\t\t\t\t\t" + str(count) + " rows")
-
-    
+			
     f.close()
 
 #Means	
@@ -104,3 +93,17 @@ for n in diffDists:
 	diffDevs.append(abs(n-dm))
 dsd = sum(diffDevs)/len(diffDevs)
 print(str(dsd))
+
+
+
+def getVal(arr,i):
+	return arr[i] if i < len(arr) else ''
+	
+if outputcsv:
+	with open('output.csv', 'w') as out:
+		writer = csv.writer(out, dialect='excel')
+		for i in range(max(len(sameDists),len(diffDists))):
+			row = [str(getVal(sameDists, i)), str(getVal(diffDists, i))]
+			writer.writerow(row)
+		
+
