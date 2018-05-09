@@ -17,7 +17,7 @@ class modelmaker:
 		return s1
 	
 	def makeModel(self, datasetpath):
-		with open('../data/trainSmall.csv', 'r', encoding='utf-8') as f:
+		with open('../data/train.csv', 'r', encoding='utf-8') as f:
 			sentences = []
 			reader = csv.reader(f)
 			
