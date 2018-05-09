@@ -87,11 +87,15 @@ class mlpnode:
     
 
 class inputNode:
-    def __init__(self):
-        forwardValue = 0
+    def __init__(self, fv=0):
+        self.forwardValue = fv
     
     def setValue(self, value):
-        forwardValue = value
+        self.forwardValue = value
+		
+    def backprop(self):
+        #do nothing
+        _ = "_"
 
 
 class MLP:
@@ -120,7 +124,8 @@ class MLP:
             for node in self.layers[i]:
                 for inNode in self.layers[i-1]:
                     node.addInNode(inNode)
-                    
+                node.addInNode(inputNode(fv=1))
+					
         #outputs
         for i in range(1, len(self.layers)-1):
             for node in self.layers[i]:
@@ -174,8 +179,8 @@ fout = mlp.feedForward([1.0,0.0])
 
 
 for n in range(100001):
-    out1 = mlp.feedForward([1,1])
-    mlp.backProp(out1, [0.7])
+    out1 = mlp.feedForward([-1,-1])
+    mlp.backProp(out1, [0])
 
     out2 = mlp.feedForward([-1,1])
     mlp.backProp(out2, [1])
@@ -184,7 +189,7 @@ for n in range(100001):
     mlp.backProp(out3, [1])
 
     out4 = mlp.feedForward([1,1])
-    mlp.backProp(out4, [1])
+    mlp.backProp(out4, [0])
 
     if((n)%1000==0):
         print(str(out1)+"\t"+str(out2)+"\t"+str(out3)+"\t"+str(out4))

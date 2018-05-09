@@ -2,6 +2,7 @@ import gensim
 from gensim.models import Word2Vec
 import numpy as np
 from nltk.corpus import stopwords
+from scipy import spatial
 import csv
 import sys
 sys.path.insert(0, '../helpers')
@@ -18,7 +19,7 @@ class wordvecclassifier:
 	def __init__(self, useGooglewv=False, outputcsv=False):
 		self.outputcsv = outputcsv
 		#set word2vec model (google one set to false due to mahoosive file
-		self.model = gensim.models.KeyedVectors.load_word2vec_format('../wordVecData/GoogleNews-vectors-negative300.bin', binary=True) if useGooglewv else Word2Vec.load('training model')
+		self.model = gensim.models.KeyedVectors.load_word2vec_format('../wordVecData/GoogleNews-vectors-negative300.bin', binary=True) if useGooglewv else Word2Vec.load('../Word2Vec/training model')
 	
 	def prepareWords(self, s):
 		s2 = self.wp.removePunctuation(s)
@@ -32,19 +33,20 @@ class wordvecclassifier:
 		
 		for w in arr:
 			try:
-				vecs.append(self.model.wv[w])
 				#print(w)
-			except:
-				continue
+				vecs.append(self.model.wv[w])
+			except KeyError as err:
+				x = 1
+				
 		
 		#average the vectors
-		vec = vecs[0]
-		for v in vecs:
-			vec = vec+v
+		vec = np.sum(vecs, axis=0)
 		
-		vec = vec - vec[0]
-		return vec/len(vecs)
-		#return vec
+		if (len(vecs) == 0):
+			return 0
+		else:
+			return vec/len(vecs)
+			#return vec
 
 
 	def getEstimates(self, s1, s2):
@@ -53,8 +55,9 @@ class wordvecclassifier:
 		v2 = self.vectorise(s2)
 	
 		distance = np.linalg.norm(v1-v2)
-	
-		return distance
+		cosinesim = np.inner(v1,v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
+    
+		return distance, cosinesim
 
 	def getVal(self,arr,i):
 		return arr[i] if i < len(arr) else ''
@@ -67,7 +70,3 @@ class wordvecclassifier:
 				row = [str(getVal(sameDists, i)), str(getVal(diffDists, i))]
 				writer.writerow(row)
 		
-
-wvc = wordvecclassifier()
-d = wvc.getEstimates("What is the capital of bangaldesh?", "What does a capital sigma look like?")
-print(d)
