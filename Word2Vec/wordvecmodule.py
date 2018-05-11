@@ -56,9 +56,12 @@ class wordvecclassifier:
 	
 		distance = np.linalg.norm(v1-v2)
 		cosinesim = np.inner(v1,v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
+		if type(cosinesim) != int:
+			cosinesim = 0
     
-		return distance, cosinesim
-
+		return distance, cosinesim  
+        
+        
 	def getVal(self,arr,i):
 		return arr[i] if i < len(arr) else ''
 	

@@ -58,7 +58,10 @@ def compaligned(s1,s2):
     for i in range(0,len(s1)):
         if s1[i]==s2[i]:
             score=score+1
-    return score/len(s1)
+    if len(s1) != 0:
+        return score/len(s1) 
+    else:
+        return 0
 
 def score(s1,s2):
     score1,score2 =align(s1,s2,0,12,4)

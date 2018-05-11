@@ -3,7 +3,7 @@ import numpy as np
 import random as rand
 
 class mlpnode:
-    eta = 0.1
+    eta = 0.2
 
     def __init__(self):
         self.inputnodes = []
@@ -73,7 +73,7 @@ class mlpnode:
     def addInNode(self, node):
         self.inputnodes.append(node)
         self.inputweights.append(rand.uniform(-0.9,0.9))
-        print("node added")
+        #print("node added")
         
     def addOutNode(self, node):
         self.outputnodes.append(node)
@@ -169,34 +169,6 @@ class MLP:
 
 
 #TESTING
-
-mlp = MLP([2,2,1])
-print(mlp)
-print(mlp.dumpweights())
-print()
-fout = mlp.feedForward([1.0,0.0])
-
-
-
-for n in range(100001):
-    out1 = mlp.feedForward([-1,-1])
-    mlp.backProp(out1, [0])
-
-    out2 = mlp.feedForward([-1,1])
-    mlp.backProp(out2, [1])
-
-    out3 = mlp.feedForward([1,-1])
-    mlp.backProp(out3, [1])
-
-    out4 = mlp.feedForward([1,1])
-    mlp.backProp(out4, [0])
-
-    if((n)%1000==0):
-        print(str(out1)+"\t"+str(out2)+"\t"+str(out3)+"\t"+str(out4))
-
-print()
-print(mlp.dumpweights())
-
 
 
 
